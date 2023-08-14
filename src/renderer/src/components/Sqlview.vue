@@ -1,7 +1,8 @@
 <template>
   <h1>查询数据</h1>
-  <n-space vertical :size="12">
+  <n-space vertical :size="24">
     <n-data-table
+      scroll-x="2048"
       :bordered="false"
       :columns="data.columns"
       :data="data.queryData"
@@ -14,12 +15,88 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { NButton, NDataTable, NSpace } from 'naive-ui'
-
+//WING平台单号	伯俊发货时间	销售总数量	总成交金额	退货总数量	总成交金额	收款时间	商品实付	平台优惠1	平台优惠2	平台优惠3	平台优惠4	运费实付	退款时间	商品实退	平台优惠回收1	平台优惠回收2	平台优惠回收3	平台优惠回收4	运费实退
 const data = reactive({
   columns: [
     {
-      title: 'info',
-      key: 'info'
+      title: 'WING平台单号',
+      key: 'wingOrderNo'
+    },
+    {
+      title: '伯俊发货时间',
+      key: 'bjSendTime'
+    },
+    {
+      title: '总数量',
+      key: 'totalNumSalse'
+    },
+    {
+      title: '总成交金额',
+      key: 'totalAmountSalse'
+    },
+    {
+      title: '总数量',
+      key: 'totalNumRefund'
+    },
+    {
+      title: '总成交金额',
+      key: 'totalAmountRefund'
+    },
+    {
+      title: '收款时间',
+      key: 'payTime'
+    },
+    {
+      title: '商品实付',
+      key: 'goodsPay'
+    },
+    {
+      title: '平台优惠1',
+      key: 'platformDiscount1'
+    },
+    {
+      title: '平台优惠2',
+      key: 'platformDiscount2'
+    },
+    {
+      title: '平台优惠3',
+      key: 'platformDiscount3'
+    },
+    {
+      title: '平台优惠4',
+      key: 'platformDiscount4'
+    },
+    {
+      title: '运费实付',
+      key: 'freightPay'
+    },
+    {
+      title: '退款时间',
+      key: 'refundTime'
+    },
+    {
+      title: '商品实退',
+      key: 'goodsRefund'
+    },
+    {
+      title: '平台优惠回收1',
+      key: 'platformDiscountRecovery1'
+    },
+    {
+      title: '平台优惠回收2',
+      key: 'platformDiscountRecovery2'
+    },
+    {
+      title: '平台优惠回收3',
+      key: 'platformDiscountRecovery3'
+    },
+    {
+      title: '平台优惠回收4',
+      key: 'platformDiscountRecovery4'
+    },
+    {
+      title: '运费实退',
+      key: 'freightRefund'
     }
   ],
   queryData: [] as Array<{ info: string }>
