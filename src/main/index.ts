@@ -73,7 +73,7 @@ app.whenReady().then(() => {
         } else {
           console.log('Table created.')
           const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 100; i++) {
             stmt.run(`Ipsum ${i}`)
           }
           stmt.finalize()

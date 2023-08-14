@@ -5,11 +5,11 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
-    // build: {
-    //   rollupOptions: {
-    //     external: ['sqlite3']
-    //   }
-    // }
+    build: {
+      rollupOptions: {
+        external: ['sqlite3']
+      }
+    }
   },
   preload: {
     plugins: [externalizeDepsPlugin()]
