@@ -3,7 +3,8 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  queryDatabase: (): Promise<string> => ipcRenderer.invoke('query-database')
+  queryDatabase: (): Promise<string> => ipcRenderer.invoke('query-database'),
+  uploadFile: (): Promise<string> => ipcRenderer.invoke('upload-file')
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

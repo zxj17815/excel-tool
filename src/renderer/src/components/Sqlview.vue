@@ -1,5 +1,9 @@
 <template>
-  <h1>查询数据</h1>
+  <n-space>
+    <n-button type="info" @click="queryData"> 搜索 </n-button>
+    <n-button type="primary" @click="uploadFile"> 导入 </n-button>
+    <n-button type="primary" @click="queryData"> 导出 </n-button>
+  </n-space>
   <n-space vertical :size="24">
     <n-data-table
       scroll-x="2048"
@@ -9,13 +13,11 @@
       :pagination="paginationReactive"
     />
   </n-space>
-  <n-button type="primary" @click="queryData"> 搜索 </n-button>
 </template>
 
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { NButton, NDataTable, NSpace } from 'naive-ui'
-//WING平台单号	伯俊发货时间	销售总数量	总成交金额	退货总数量	总成交金额	收款时间	商品实付	平台优惠1	平台优惠2	平台优惠3	平台优惠4	运费实付	退款时间	商品实退	平台优惠回收1	平台优惠回收2	平台优惠回收3	平台优惠回收4	运费实退
 const data = reactive({
   columns: [
     {
@@ -99,7 +101,8 @@ const data = reactive({
       key: 'freightRefund'
     }
   ],
-  queryData: [] as Array<{ info: string }>
+  queryData: [] as Array<{ info: string }>,
+  uploadFile: '' as string
 })
 const paginationReactive = reactive({
   page: 1,
@@ -120,5 +123,10 @@ const queryData = async (): Promise<void> => {
   console.log('versions', versions)
   data.queryData = (await api.queryDatabase()) as Array<{ info: string }>
   console.log('result', data.queryData)
+}
+const uploadFile = async (): Promise<void> => {
+  console.log('versions', versions)
+  data.uploadFile = (await api.uploadFile()) as string
+  console.log('result', data.uploadFile)
 }
 </script>

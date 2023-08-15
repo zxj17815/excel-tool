@@ -19,7 +19,7 @@ const sqlIpc = (): void => {
           reject(err)
         }
       })
-      db.all('SELECT * FROM lorem', (err, rows) => {
+      db.all('SELECT * FROM orders', (err, rows) => {
         if (err) {
           reject(err)
         }

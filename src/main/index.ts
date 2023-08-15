@@ -9,8 +9,8 @@ import fs from 'fs'
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 960,
+    height: 720,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -67,18 +67,21 @@ app.whenReady().then(() => {
         console.error(err.message)
       }
       console.log('Connected to the database.')
-      db.run('CREATE TABLE IF NOT EXISTS lorem (info TEXT)', (err) => {
-        if (err) {
-          console.error(err.message)
-        } else {
-          console.log('Table created.')
-          const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
-          for (let i = 0; i < 100; i++) {
-            stmt.run(`Ipsum ${i}`)
+      db.run(
+        'create table if not exists orders(id integer primary key autoincrement, wingOrderNo varchar(255) not null unique, bjSendTime datetime, totalNumSalse double, totalAmountSalse double, totalNumRefund double, totalAmountRefund double, payTime datetime, goodsPay double, platformDiscount1 double, platformDiscount2 double, platformDiscount3 double, platformDiscount4 double, freightPay double, refundTime datetime, goodsRefund double, platformDiscountRecovery1 double, platformDiscountRecovery2 double, platformDiscountRecovery3 double, platformDiscountRecovery4 double, freightRefund double)',
+        (err) => {
+          if (err) {
+            console.error(err.message)
+          } else {
+            console.log('Table created.')
+            const stmt = db.prepare('INSERT INTO orders (wingOrderNo) VALUES (?)')
+            for (let i = 0; i < 100; i++) {
+              stmt.run(`wing_no_${i}`)
+            }
+            stmt.finalize()
           }
-          stmt.finalize()
         }
-      })
+      )
     })
     db.close((err) => {
       if (err) {

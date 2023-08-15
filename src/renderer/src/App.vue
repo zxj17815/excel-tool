@@ -4,8 +4,15 @@ import Sqlview from './components/Sqlview.vue'
 </script>
 
 <template>
-  <Sqlview></Sqlview>
-  <Versions></Versions>
+  <div class="header">
+    <div class="title">WING平台数据分析工具</div>
+  </div>
+  <div class="content">
+    <Sqlview></Sqlview>
+  </div>
+  <div class="footer">
+    <Versions></Versions>
+  </div>
 </template>
 
 <style lang="less">

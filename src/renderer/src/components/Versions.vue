@@ -6,7 +6,7 @@ const versions = reactive({ ...window.electron.process.versions })
 
 <template>
   <ul class="versions">
-    <li class="v8-version">App Ver1.0 by JayZhang</li>
+    <li class="v8-version">App Version 1.0 by JayZhang</li>
     <li class="electron-version">Electron v{{ versions.electron }}</li>
     <li class="chrome-version">Chromium v{{ versions.chrome }}</li>
     <li class="node-version">Node v{{ versions.node }}</li>
@@ -17,8 +17,6 @@ const versions = reactive({ ...window.electron.process.versions })
 <style lang="less" scoped>
 ul {
   list-style: none;
-  position: absolute;
-  bottom: 10px;
 }
 
 .versions {
