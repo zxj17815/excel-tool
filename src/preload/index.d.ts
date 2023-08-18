@@ -1,7 +1,7 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
 interface CustomApi {
-  queryDatabase: () => Promise<Array>
+  selectOrders: (args) => Promise<Array>
   uploadFile: () => Promise<string>
 }
 

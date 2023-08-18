@@ -121,7 +121,7 @@ const versions = reactive({ ...window.electron.process.versions })
 const api = window.api
 const queryData = async (): Promise<void> => {
   console.log('versions', versions)
-  data.queryData = (await api.queryDatabase()) as Array<{ info: string }>
+  data.queryData = (await api.selectOrders(null)) as Array<{ info: string }>
   console.log('result', data.queryData)
 }
 const uploadFile = async (): Promise<void> => {

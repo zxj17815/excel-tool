@@ -3,7 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  queryDatabase: (): Promise<string> => ipcRenderer.invoke('query-database'),
+  selectOrders: (args): Promise<string> => ipcRenderer.invoke('select-orders', args),
   uploadFile: (): Promise<string> => ipcRenderer.invoke('upload-file')
 }
 
