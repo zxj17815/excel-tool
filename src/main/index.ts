@@ -68,17 +68,17 @@ app.whenReady().then(() => {
       }
       console.log('Connected to the database.')
       db.run(
-        'create table if not exists orders(id integer primary key autoincrement, wingOrderNo varchar(255) not null unique, bjSendTime datetime, totalNumSalse double, totalAmountSalse double, totalNumRefund double, totalAmountRefund double, payTime datetime, goodsPay double, platformDiscount1 double, platformDiscount2 double, platformDiscount3 double, platformDiscount4 double, freightPay double, refundTime datetime, goodsRefund double, platformDiscountRecovery1 double, platformDiscountRecovery2 double, platformDiscountRecovery3 double, platformDiscountRecovery4 double, freightRefund double)',
+        'create table if not exists orders(wingOrderNo varchar(255) primary key, bjSendTime datetime, totalNumSalse double, totalAmountSalse double, totalNumRefund double, totalAmountRefund double, payTime datetime, goodsPay double, platformDiscount1 double, platformDiscount2 double, platformDiscount3 double, platformDiscount4 double, freightPay double, refundTime datetime, goodsRefund double, platformDiscountRecovery1 double, platformDiscountRecovery2 double, platformDiscountRecovery3 double, platformDiscountRecovery4 double, freightRefund double)',
         (err) => {
           if (err) {
             console.error(err.message)
           } else {
             console.log('Table created.')
-            const stmt = db.prepare('INSERT INTO orders (wingOrderNo) VALUES (?)')
-            for (let i = 0; i < 100; i++) {
-              stmt.run(`wing_no_${i}`)
-            }
-            stmt.finalize()
+            // const stmt = db.prepare('INSERT INTO orders (wingOrderNo) VALUES (?)')
+            // for (let i = 0; i < 100; i++) {
+            //   stmt.run(`wing_no_${i}`)
+            // }
+            // stmt.finalize()
           }
         }
       )

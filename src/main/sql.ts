@@ -56,7 +56,7 @@ const doSql = (sql: string, sql_type: sqlType): Promise<unknown> => {
 //查询orders表
 const select_orders = (args): Promise<unknown> => {
   return new Promise((resolve, reject) => {
-    const sql = 'SELECT * FROM orders'
+    const sql = `SELECT strftime('%Y/%m/%d',bjSendTime) as bjSendTime FROM orders`
     doSql(sql, sqlType.SELECT)
       .then((result) => {
         resolve(result)
@@ -67,20 +67,24 @@ const select_orders = (args): Promise<unknown> => {
   })
 }
 
+
+
 /**
- * 插入orders表
+ * 插入orders表 伯俊销售单
  * @param items
  * @returns
  */
-const insert_orders = (items): Promise<unknown> => {
+const insert_orders_bj_sale = (items): Promise<unknown> => {
   let sql_batch =
-    'insert into orders (order_id, order_no, order_time, order_amount, order_status, order_remark) values '
+    'insert or replace into orders (wingOrderNo, bjSendTime, totalNumSalse, totalAmountSalse) values '
   for (let i = 0; i < items.length; i++) {
-    sql_batch += `('${items[i].order_id}', '${items[i].order_no}', '${items[i].order_time}', '${items[i].order_amount}', '${items[i].order_status}', '${items[i].order_remark}')`
+    sql_batch += `('${items[i].wingOrderNo}', '${items[i].bjSendTime}', '${items[i].totalNumSalse}', '${items[i].totalAmountSalse}')`
     if (i < items.length - 1) {
       sql_batch += ','
     }
   }
+  sql_batch +=
+    'on conflict(wingOrderNo) do update set bjSendTime=excluded.bjSendTime, totalNumSalse=ifnull(orders.totalNumSalse,0)+excluded.totalNumSalse, totalAmountSalse=ifnull(orders.totalAmountSalse,0)+excluded.totalAmountSalse'
   return new Promise((resolve, reject) => {
     doSql(sql_batch, sqlType.INSERT)
       .then((result) => {
@@ -92,4 +96,58 @@ const insert_orders = (items): Promise<unknown> => {
   })
 }
 
-export { select_orders, insert_orders }
+/**
+ * 插入orders表 伯俊退货单
+ * @param items
+ * @returns
+ */
+const insert_orders_bj_return = (items): Promise<unknown> => {
+  let sql_batch =
+    'insert or replace into orders (wingOrderNo, totalNumRefund, totalAmountRefund) values '
+  for (let i = 0; i < items.length; i++) {
+    sql_batch += `('${items[i].wingOrderNo}', '${items[i].totalNumRefund}', '${items[i].totalAmountRefund}')`
+    if (i < items.length - 1) {
+      sql_batch += ','
+    }
+  }
+  sql_batch +=
+    'on conflict(wingOrderNo) do update set totalNumRefund=ifnull(orders.totalNumRefund,0)+excluded.totalNumRefund, totalAmountRefund=ifnull(orders.totalAmountRefund,0)+excluded.totalAmountRefund'
+  return new Promise((resolve, reject) => {
+    doSql(sql_batch, sqlType.INSERT)
+      .then((result) => {
+        resolve(result)
+      })
+      .catch((err) => {
+        reject(err)
+      })
+  })
+}
+
+/**
+ * 插入orders表 资金流水
+ * @param items
+ * @returns
+ */
+const insert_orders_cash_flow = (items): Promise<unknown> => {
+  let sql_batch =
+    'insert or replace into orders (wingOrderNo, payTime,goodsPay,platformDiscount1,platformDiscount2,platformDiscount3,platformDiscount4,freightPay,refundTime,goodsRefund,platformDiscountRecovery1,platformDiscountRecovery2,platformDiscountRecovery3,platformDiscountRecovery4,freightRefund) values '
+  for (let i = 0; i < items.length; i++) {
+    console.log(items[i])
+    sql_batch += `('${items[i].wingOrderNo}', '${items[i].payTime}', '${items[i].goodsPay}', '${items[i].platformDiscount1}', '${items[i].platformDiscount2}', '${items[i].platformDiscount3}', '${items[i].platformDiscount4}', '${items[i].freightPay}', '${items[i].refundTime}', '${items[i].goodsRefund}', '${items[i].platformDiscountRecovery1}', '${items[i].platformDiscountRecovery2}', '${items[i].platformDiscountRecovery3}', '${items[i].platformDiscountRecovery4}', '${items[i].freightRefund}')`
+    if (i < items.length - 1) {
+      sql_batch += ','
+    }
+  }
+  sql_batch += `on conflict(wingOrderNo) do update set payTime=excluded.payTime,goodsPay=ifnull(orders.goodsPay,0)+excluded.goodsPay,platformDiscount1=ifnull(orders.platformDiscount1,0)+excluded.platformDiscount1,platformDiscount2=ifnull(orders.platformDiscount2,0)+excluded.platformDiscount2,platformDiscount3=ifnull(orders.platformDiscount3,0)+excluded.platformDiscount3,platformDiscount4=ifnull(orders.platformDiscount4,0)+excluded.platformDiscount4,freightPay=ifnull(orders.freightPay,0)+excluded.freightPay,refundTime=excluded.refundTime,goodsRefund=ifnull(orders.goodsRefund,0)+excluded.goodsRefund,platformDiscountRecovery1=ifnull(orders.platformDiscountRecovery1,0)+excluded.platformDiscountRecovery1,platformDiscountRecovery2=ifnull(orders.platformDiscountRecovery2,0)+excluded.platformDiscountRecovery2,platformDiscountRecovery3=ifnull(orders.platformDiscountRecovery3,0)+excluded.platformDiscountRecovery3,platformDiscountRecovery4=ifnull(orders.platformDiscountRecovery4,0)+excluded.platformDiscountRecovery4,freightRefund=ifnull(orders.freightRefund,0)+excluded.freightRefund`
+  return new Promise((resolve, reject) => {
+    doSql(sql_batch, sqlType.INSERT)
+      .then((result) => {
+        resolve(result)
+      })
+      .catch((err) => {
+        reject(err)
+      })
+  })
+}
+
+export { select_orders, insert_orders_bj_sale, insert_orders_bj_return, insert_orders_cash_flow }

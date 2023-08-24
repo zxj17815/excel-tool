@@ -5,13 +5,8 @@
     <n-button type="primary" @click="queryData"> 导出 </n-button>
   </n-space>
   <n-space vertical :size="24">
-    <n-data-table
-      scroll-x="2048"
-      :bordered="false"
-      :columns="data.columns"
-      :data="data.queryData"
-      :pagination="paginationReactive"
-    />
+    <n-data-table scroll-x="2048" :bordered="false" :columns="data.columns" :data="data.queryData"
+      :pagination="paginationReactive" />
   </n-space>
 </template>
 
@@ -126,7 +121,9 @@ const queryData = async (): Promise<void> => {
 }
 const uploadFile = async (): Promise<void> => {
   console.log('versions', versions)
-  data.uploadFile = (await api.uploadFile()) as string
-  console.log('result', data.uploadFile)
+  api.uploadFile().then((res) => {
+    console.log('result', res)
+    queryData()
+  })
 }
 </script>
