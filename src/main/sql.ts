@@ -1,8 +1,8 @@
-import { ipcMain } from 'electron'
 import sqlite3 from 'sqlite3'
 import { app } from 'electron'
 import { is } from '@electron-toolkit/utils'
 import { join } from 'path'
+import { format } from 'date-fns'
 
 // sql操作类型
 enum sqlType {
@@ -14,7 +14,7 @@ enum sqlType {
 }
 
 // 执行sql
-const doSql = (sql: string, sql_type: sqlType): Promise<unknown> => {
+const doSql = (sql: string, sql_type: sqlType): Promise<unknown[] | boolean> => {
   let sqliteFilePath: string
   if (is.dev) {
     sqliteFilePath = './database.sqlite'
@@ -54,9 +54,14 @@ const doSql = (sql: string, sql_type: sqlType): Promise<unknown> => {
 }
 
 //查询orders表
-const select_orders = (args): Promise<unknown> => {
+const select_orders = (args): Promise<unknown[] | boolean> => {
   return new Promise((resolve, reject) => {
-    const sql = `SELECT strftime('%Y/%m/%d',bjSendTime) as bjSendTime FROM orders`
+    let sql = `SELECT * FROM orders`
+    if (args) {
+      sql += ` where ${args}`
+    }
+    sql += ` order by bjSendTime desc`
+    console.log(sql)
     doSql(sql, sqlType.SELECT)
       .then((result) => {
         resolve(result)
@@ -67,8 +72,6 @@ const select_orders = (args): Promise<unknown> => {
   })
 }
 
-
-
 /**
  * 插入orders表 伯俊销售单
  * @param items
@@ -78,13 +81,17 @@ const insert_orders_bj_sale = (items): Promise<unknown> => {
   let sql_batch =
     'insert or replace into orders (wingOrderNo, bjSendTime, totalNumSalse, totalAmountSalse) values '
   for (let i = 0; i < items.length; i++) {
-    sql_batch += `('${items[i].wingOrderNo}', '${items[i].bjSendTime}', '${items[i].totalNumSalse}', '${items[i].totalAmountSalse}')`
+    sql_batch += `('${items[i].wingOrderNo}', '${format(
+      items[i].bjSendTime,
+      'yyyy-MM-dd HH:mm:ss'
+    )}', '${items[i].totalNumSalse}', '${items[i].totalAmountSalse}')`
     if (i < items.length - 1) {
       sql_batch += ','
     }
   }
   sql_batch +=
     'on conflict(wingOrderNo) do update set bjSendTime=excluded.bjSendTime, totalNumSalse=ifnull(orders.totalNumSalse,0)+excluded.totalNumSalse, totalAmountSalse=ifnull(orders.totalAmountSalse,0)+excluded.totalAmountSalse'
+  console.log(sql_batch)
   return new Promise((resolve, reject) => {
     doSql(sql_batch, sqlType.INSERT)
       .then((result) => {

@@ -41,7 +41,36 @@ interface CashFlowItem {
   freightRefund: number
 }
 
+interface excelItem {
+  wingOrderNo: string
+  bjSendTime: Date
+  totalNumSalse: number
+  totalAmountSalse: number
+  totalNumRefund: number
+  totalAmountRefund: number
+  payTime: Date
+  goodsPay: number
+  platformDiscount1: number
+  platformDiscount2: number
+  platformDiscount3: number
+  platformDiscount4: number
+  freightPay: number
+  refundTime: Date
+  goodsRefund: number
+  platformDiscountRecovery1: number
+  platformDiscountRecovery2: number
+  platformDiscountRecovery3: number
+  platformDiscountRecovery4: number
+  freightRefund: number
+}
+
+/**
+ * 解析excel
+ * @param filePath
+ * @returns
+ */
 const sheet_analyze = async (filePath: string): Promise<unknown> => {
+  let err_msg = ''
   const workbook = new ExcelJS.Workbook()
   await workbook.xlsx.readFile(filePath)
   const worksheet_sale = workbook.getWorksheet(ExcelSheet.BJ_SALES)
@@ -51,6 +80,16 @@ const sheet_analyze = async (filePath: string): Promise<unknown> => {
     const bjSendTime = 2
     const totalNumSalse = 3
     const totalAmountSalse = 4
+
+    const r1 = worksheet_sale.getRow(1).values
+    if (
+      r1[wingOrderNo] != 'WING平台单号' ||
+      r1[bjSendTime] != '伯俊发货时间' ||
+      r1[totalNumSalse] != '总数量' ||
+      r1[totalAmountSalse] != '总成交金额'
+    ) {
+      err_msg = '伯俊销售单格式错误'
+    }
 
     worksheet_sale.eachRow((row, rowNumber) => {
       if (
@@ -74,6 +113,15 @@ const sheet_analyze = async (filePath: string): Promise<unknown> => {
     const wingOrderNo = 1
     const totalNumRefund = 2
     const totalAmountRefund = 3
+
+    const r1 = worksheet_return.getRow(1).values
+    if (
+      r1[wingOrderNo] != 'WING平台单号' ||
+      r1[totalNumRefund] != '总数量' ||
+      r1[totalAmountRefund] != '总成交金额'
+    ) {
+      err_msg = '伯俊退货单格式错误'
+    }
 
     worksheet_return.eachRow((row, rowNumber) => {
       if (
@@ -108,6 +156,27 @@ const sheet_analyze = async (filePath: string): Promise<unknown> => {
     const platformDiscountRecovery3 = 13
     const platformDiscountRecovery4 = 14
     const freightRefund = 15
+
+    const r1 = worksheet_cash_flow.getRow(1).values
+    if (
+      r1[wingOrderNo] != 'WING平台单号' ||
+      r1[payTime] != '收款时间' ||
+      r1[goodsPay] != '商品实付' ||
+      r1[platformDiscount1] != '平台优惠1' ||
+      r1[platformDiscount2] != '平台优惠2' ||
+      r1[platformDiscount3] != '平台优惠3' ||
+      r1[platformDiscount4] != '平台优惠4' ||
+      r1[freightPay] != '运费实付' ||
+      r1[refundTime] != '退款时间' ||
+      r1[goodsRefund] != '商品实退' ||
+      r1[platformDiscountRecovery1] != '平台优惠回收1' ||
+      r1[platformDiscountRecovery2] != '平台优惠回收2' ||
+      r1[platformDiscountRecovery3] != '平台优惠回收3' ||
+      r1[platformDiscountRecovery4] != '平台优惠回收4' ||
+      r1[freightRefund] != '运费实退'
+    ) {
+      err_msg = '资金流水格式错误'
+    }
 
     worksheet_cash_flow.eachRow((row, rowNumber) => {
       if (
@@ -153,23 +222,96 @@ const sheet_analyze = async (filePath: string): Promise<unknown> => {
     })
   }
   return new Promise((resolve, reject) => {
-    sql
-      .insert_orders_bj_sale(items_bj_sale)
-      .then(() => {
-        console.log('insert_orders_bj_sale success')
-        sql.insert_orders_bj_return(items_bj_return)
-      })
-      .then(() => {
-        console.log('insert_orders_bj_return success')
-        sql.insert_orders_cash_flow(items_cash_flow)
-      })
-      .then(() => {
-        console.log('insert_orders_cash_flow success')
-        resolve('success')
-      })
-      .catch((err) => {
-        reject(err)
-      })
+    if (err_msg != '') {
+      reject(err_msg)
+    } else {
+      sql
+        .insert_orders_bj_sale(items_bj_sale)
+        .then(() => {
+          console.log('insert_orders_bj_sale success')
+          sql.insert_orders_bj_return(items_bj_return)
+        })
+        .then(() => {
+          console.log('insert_orders_bj_return success')
+          sql.insert_orders_cash_flow(items_cash_flow)
+        })
+        .then(() => {
+          console.log('insert_orders_cash_flow success')
+          resolve('success')
+        })
+        .catch((err) => {
+          reject(err)
+        })
+    }
   })
 }
-export { sheet_analyze }
+
+/**
+ * 创建excel
+ * @param filePath
+ * @param sql_query
+ * @returns
+ */
+const create_excel = async (filePath: string, sql_query: string): Promise<unknown> => {
+  const workbook = new ExcelJS.Workbook()
+  workbook.creator = 'jay'
+  workbook.lastModifiedBy = 'jay'
+  workbook.company = 'northernlights.tech'
+  workbook.created = new Date(Date.now())
+  workbook.modified = new Date(Date.now())
+  workbook.lastPrinted = new Date(Date.now())
+  const worksheet = workbook.addWorksheet('My Sheet')
+  worksheet.columns = [
+    { header: 'WING平台单号', key: 'wingOrderNo', width: 10 },
+    { header: '伯俊发货时间', key: 'bjSendTime', width: 32 },
+    { header: '总数量', key: 'totalNumSalse', width: 10 },
+    { header: '总成交金额', key: 'totalAmountSalse', width: 10 },
+    { header: '总数量(退款)', key: 'totalNumRefund', width: 10 },
+    { header: '总成交金额(退款)', key: 'totalAmountRefund', width: 10 },
+    { header: '收款时间', key: 'payTime', width: 32 },
+    { header: '商品实付', key: 'goodsPay', width: 10 },
+    { header: '平台优惠1', key: 'platformDiscount1', width: 10 },
+    { header: '平台优惠2', key: 'platformDiscount2', width: 10 },
+    { header: '平台优惠3', key: 'platformDiscount3', width: 10 },
+    { header: '平台优惠4', key: 'platformDiscount4', width: 10 },
+    { header: '运费实付', key: 'freightPay', width: 10 },
+    { header: '退款时间', key: 'refundTime', width: 32 },
+    { header: '商品实退', key: 'goodsRefund', width: 10 },
+    { header: '平台优惠回收1', key: 'platformDiscountRecovery1', width: 10 },
+    { header: '平台优惠回收2', key: 'platformDiscountRecovery2', width: 10 },
+    { header: '平台优惠回收3', key: 'platformDiscountRecovery3', width: 10 },
+    { header: '平台优惠回收4', key: 'platformDiscountRecovery4', width: 10 },
+    { header: '运费实退', key: 'freightRefund', width: 10 }
+  ]
+  return sql.select_orders(sql_query).then((data) => {
+    const row = data as excelItem[]
+    const data_excel = [] as unknown[]
+    row.forEach((element) => {
+      data_excel.push([
+        element.wingOrderNo,
+        element.bjSendTime,
+        element.totalNumSalse,
+        element.totalAmountSalse,
+        element.totalNumRefund,
+        element.totalAmountRefund,
+        element.payTime,
+        element.goodsPay,
+        element.platformDiscount1,
+        element.platformDiscount2,
+        element.platformDiscount3,
+        element.platformDiscount4,
+        element.freightPay,
+        element.refundTime,
+        element.goodsRefund,
+        element.platformDiscountRecovery1,
+        element.platformDiscountRecovery2,
+        element.platformDiscountRecovery3,
+        element.platformDiscountRecovery4,
+        element.freightRefund
+      ])
+    })
+    worksheet.addRows(data_excel)
+    workbook.xlsx.writeFile(filePath)
+  })
+}
+export { sheet_analyze, create_excel }

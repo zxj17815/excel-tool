@@ -5,6 +5,7 @@ import * as ExcelAnalyze from './excel_analyze'
 const customIpc = (): void => {
   //查询orders表
   ipcMain.handle('select-orders', async (event, args) => {
+    console.log('select-orders args', args)
     return sql.select_orders(args)
   })
   // //插入orders表
@@ -29,6 +30,27 @@ const customIpc = (): void => {
       // 错误处理
       console.log(err)
       return err
+    }
+  })
+
+  //导出excel
+  ipcMain.handle('export-file', async (event, args) => {
+    console.log('export-file args', args)
+    try {
+      // 打开保存文件对话框
+      const result = await dialog.showSaveDialog({
+        title: '导出文件',
+        defaultPath: 'exported-file.xlsx', // 默认文件名
+        filters: [{ name: '文本文件', extensions: ['xlsx'] }]
+      })
+      if (!result.canceled && result.filePath) {
+        return ExcelAnalyze.create_excel(result.filePath, args)
+      } else {
+        return '取消导出'
+      }
+    } catch (error) {
+      console.error('文件导出失败：', error)
+      return error
     }
   })
 }

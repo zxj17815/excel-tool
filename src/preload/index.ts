@@ -1,10 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { ar } from 'date-fns/locale'
 
 // Custom APIs for renderer
 const api = {
   selectOrders: (args): Promise<string> => ipcRenderer.invoke('select-orders', args),
-  uploadFile: (): Promise<string> => ipcRenderer.invoke('upload-file')
+  uploadFile: (): Promise<string> => ipcRenderer.invoke('upload-file'),
+  exportFile: (args): Promise<string> => ipcRenderer.invoke('export-file', args)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

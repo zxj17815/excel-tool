@@ -1,19 +1,49 @@
 <template>
   <n-space>
+    <n-date-picker v-model:value="data.dateRange" type="daterange" clearable></n-date-picker>
+    <n-input-group>
+      <n-input-group-label>WING平台单号</n-input-group-label>
+      <n-input v-model:value="data.queryOptions.wingOrderNo" />
+    </n-input-group>
     <n-button type="info" @click="queryData"> 搜索 </n-button>
-    <n-button type="primary" @click="uploadFile"> 导入 </n-button>
-    <n-button type="primary" @click="queryData"> 导出 </n-button>
+    <n-button type="primary" :loading="data.loading" @click="uploadFile"> 导入 </n-button>
+    <n-button type="primary" :loading="data.loading" @click="exportFile"> 导出 </n-button>
   </n-space>
   <n-space vertical :size="24">
-    <n-data-table scroll-x="2048" :bordered="false" :columns="data.columns" :data="data.queryData"
-      :pagination="paginationReactive" />
+    <n-data-table
+      scroll-x="2048"
+      :bordered="false"
+      :columns="data.columns"
+      :data="data.queryData"
+      :pagination="paginationReactive"
+    />
   </n-space>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
-import { NButton, NDataTable, NSpace } from 'naive-ui'
+import { VNode, h, reactive } from 'vue'
+import {
+  NButton,
+  NInputGroup,
+  NInput,
+  NInputGroupLabel,
+  NDataTable,
+  NSpace,
+  NDatePicker,
+  useNotification
+} from 'naive-ui'
+import { format } from 'date-fns'
+interface Columns {
+  bjSendTime: string
+  payTime: string
+  refundTime: string
+}
+const notification = useNotification()
 const data = reactive({
+  dateRange: [new Date(Date.now()).setDate(1), Date.now()] as [number, number],
+  queryOptions: {
+    wingOrderNo: ''
+  },
   columns: [
     {
       title: 'WING平台单号',
@@ -21,7 +51,10 @@ const data = reactive({
     },
     {
       title: '伯俊发货时间',
-      key: 'bjSendTime'
+      key: 'bjSendTime',
+      render: (row: Columns): VNode => {
+        return h('span', format(Date.parse(row.bjSendTime), 'yyyy-MM-dd HH:mm:ss'))
+      }
     },
     {
       title: '总数量',
@@ -32,16 +65,23 @@ const data = reactive({
       key: 'totalAmountSalse'
     },
     {
-      title: '总数量',
+      title: '总数量(退款)',
       key: 'totalNumRefund'
     },
     {
-      title: '总成交金额',
+      title: '总成交金额(退款)',
       key: 'totalAmountRefund'
     },
     {
       title: '收款时间',
-      key: 'payTime'
+      key: 'payTime',
+      render: (row: Columns): VNode => {
+        try {
+          return h('span', format(Date.parse(row.payTime), 'yyyy-MM-dd HH:mm:ss'))
+        } catch (error) {
+          return h('span', '')
+        }
+      }
     },
     {
       title: '商品实付',
@@ -69,7 +109,14 @@ const data = reactive({
     },
     {
       title: '退款时间',
-      key: 'refundTime'
+      key: 'refundTime',
+      render: (row: Columns): VNode => {
+        try {
+          return h('span', format(Date.parse(row.refundTime), 'yyyy-MM-dd HH:mm:ss'))
+        } catch (error) {
+          return h('span', '')
+        }
+      }
     },
     {
       title: '商品实退',
@@ -97,7 +144,8 @@ const data = reactive({
     }
   ],
   queryData: [] as Array<{ info: string }>,
-  uploadFile: '' as string
+  uploadFile: '' as string,
+  loading: false
 })
 const paginationReactive = reactive({
   page: 1,
@@ -116,14 +164,64 @@ const versions = reactive({ ...window.electron.process.versions })
 const api = window.api
 const queryData = async (): Promise<void> => {
   console.log('versions', versions)
-  data.queryData = (await api.selectOrders(null)) as Array<{ info: string }>
+  const sql = `bjSendTime between '${format(
+    data.dateRange[0],
+    'yyyy-MM-dd HH:mm:ss'
+  )}' and '${format(data.dateRange[1], 'yyyy-MM-dd HH:mm:ss')}' and wingOrderNo like '%${
+    data.queryOptions.wingOrderNo
+  }%'`
+  data.queryData = (await api.selectOrders(sql)) as Array<{ info: string }>
   console.log('result', data.queryData)
 }
 const uploadFile = async (): Promise<void> => {
+  data.loading = true
   console.log('versions', versions)
-  api.uploadFile().then((res) => {
-    console.log('result', res)
-    queryData()
-  })
+  api
+    .uploadFile()
+    .then((res) => {
+      console.log('result', res)
+      data.loading = false
+      notification.success({
+        content: '导入成功',
+        keepAliveOnHover: true
+      })
+      queryData()
+    })
+    .catch((err) => {
+      data.loading = false
+      notification.error({
+        content: '导入失败',
+        meta: err.message,
+        keepAliveOnHover: true
+      })
+    })
+}
+const exportFile = async (): Promise<void> => {
+  data.loading = true
+  console.log('versions', versions)
+  const sql = `bjSendTime between '${format(
+    data.dateRange[0],
+    'yyyy-MM-dd HH:mm:ss'
+  )}' and '${format(data.dateRange[1], 'yyyy-MM-dd HH:mm:ss')}' and wingOrderNo like '%${
+    data.queryOptions.wingOrderNo
+  }%'`
+  api
+    .exportFile(sql)
+    .then((res) => {
+      console.log('result', res)
+      data.loading = false
+      notification.success({
+        content: '导出成功',
+        keepAliveOnHover: true
+      })
+    })
+    .catch((err) => {
+      data.loading = false
+      notification.error({
+        content: '导出失败',
+        meta: err.message,
+        keepAliveOnHover: true
+      })
+    })
 }
 </script>
