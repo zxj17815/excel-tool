@@ -5,7 +5,7 @@ import * as ExcelAnalyze from './excel_analyze'
 const customIpc = (): void => {
   //查询orders表
   ipcMain.handle('select-orders', async (event, args) => {
-    console.log('select-orders args', args)
+    console.log('select-orders args', event, args)
     return sql.select_orders(args)
   })
   // //插入orders表
@@ -35,7 +35,7 @@ const customIpc = (): void => {
 
   //导出excel
   ipcMain.handle('export-file', async (event, args) => {
-    console.log('export-file args', args)
+    console.log('export-file args', event, args)
     try {
       // 打开保存文件对话框
       const result = await dialog.showSaveDialog({
