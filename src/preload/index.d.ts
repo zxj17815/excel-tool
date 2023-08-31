@@ -4,6 +4,7 @@ interface CustomApi {
   selectOrders: (args) => Promise<Array>
   uploadFile: () => Promise<string>
   exportFile: (args) => Promise<string>
+  deleteOrders: (args) => Promise<string>
 }
 
 declare global {

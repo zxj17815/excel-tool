@@ -8,10 +8,6 @@ const customIpc = (): void => {
     console.log('select-orders args', event, args)
     return sql.select_orders(args)
   })
-  // //插入orders表
-  // ipcMain.handle('insert-orders', async (event, args) => {
-  //   return insert_orders(args)
-  // })
 
   //导入excel
   ipcMain.handle('upload-file', async (event) => {
@@ -52,6 +48,12 @@ const customIpc = (): void => {
       console.error('文件导出失败：', error)
       return error
     }
+  })
+
+  //删除order
+  ipcMain.handle('delete-orders', async (event, args) => {
+    console.log('delete-order args', event, args)
+    return sql.delete_orders(args)
   })
 }
 export default customIpc

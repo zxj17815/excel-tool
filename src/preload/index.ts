@@ -5,7 +5,8 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   selectOrders: (args): Promise<string> => ipcRenderer.invoke('select-orders', args),
   uploadFile: (): Promise<string> => ipcRenderer.invoke('upload-file'),
-  exportFile: (args): Promise<string> => ipcRenderer.invoke('export-file', args)
+  exportFile: (args): Promise<string> => ipcRenderer.invoke('export-file', args),
+  deleteOrders: (args): Promise<string> => ipcRenderer.invoke('delete-orders', args)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -11,7 +11,7 @@
   </n-space>
   <n-space vertical :size="24">
     <n-data-table
-      scroll-x="2048"
+      scroll-x="2600"
       :bordered="false"
       :columns="data.columns"
       :data="data.queryData"
@@ -30,15 +30,18 @@ import {
   NDataTable,
   NSpace,
   NDatePicker,
-  useNotification
+  useNotification,
+  useDialog
 } from 'naive-ui'
 import { format } from 'date-fns'
 interface Columns {
+  wingOrderNo: string
   bjSendTime: string
   payTime: string
   refundTime: string
 }
 const notification = useNotification()
+const dialog = useDialog()
 const data = reactive({
   dateRange: [new Date(Date.now()).setDate(1), Date.now()] as [number, number],
   queryOptions: {
@@ -47,7 +50,8 @@ const data = reactive({
   columns: [
     {
       title: 'WING平台单号',
-      key: 'wingOrderNo'
+      key: 'wingOrderNo',
+      fixed: 'left'
     },
     {
       title: '伯俊发货时间',
@@ -141,6 +145,52 @@ const data = reactive({
     {
       title: '运费实退',
       key: 'freightRefund'
+    },
+    {
+      title: '操作',
+      key: 'action',
+      fixed: 'right',
+      render: (row: Columns): VNode => {
+        return h(
+          NButton,
+          {
+            type: 'error',
+            onClick: () => {
+              dialog.warning({
+                title: '警告',
+                content: '你确定？',
+                positiveText: '确定',
+                negativeText: '不确定',
+                onPositiveClick: () => {
+                  const sql_where = `wingOrderNo='${row.wingOrderNo}'`
+                  api
+                    .deleteOrders(sql_where)
+                    .then((res) => {
+                      console.log('result', res)
+                      queryData()
+                      notification.success({
+                        content: '已删除:' + row.wingOrderNo
+                      })
+                    })
+                    .catch((err) => {
+                      notification.error({
+                        content: '删除失败:' + row.wingOrderNo,
+                        meta: err.message,
+                        keepAliveOnHover: true
+                      })
+                    })
+                },
+                onNegativeClick: () => {
+                  console.log('cancel')
+                }
+              })
+            }
+          },
+          {
+            default: () => '删除'
+          }
+        )
+      }
     }
   ],
   queryData: [] as Array<{ info: string }>,

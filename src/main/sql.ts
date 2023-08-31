@@ -49,6 +49,13 @@ const doSql = (sql: string, sql_type: sqlType): Promise<unknown[] | boolean> => 
         }
         resolve(true)
       })
+    } else if (sqlType.DELETE === sql_type) {
+      db.run(sql, (err) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(true)
+      })
     }
   })
 }
@@ -157,4 +164,23 @@ const insert_orders_cash_flow = (items): Promise<unknown> => {
   })
 }
 
-export { select_orders, insert_orders_bj_sale, insert_orders_bj_return, insert_orders_cash_flow }
+const delete_orders = (args): Promise<unknown> => {
+  const sql = `delete from orders where ${args}`
+  return new Promise((resolve, reject) => {
+    doSql(sql, sqlType.DELETE)
+      .then((result) => {
+        resolve(result)
+      })
+      .catch((err) => {
+        reject(err)
+      })
+  })
+}
+
+export {
+  select_orders,
+  insert_orders_bj_sale,
+  insert_orders_bj_return,
+  insert_orders_cash_flow,
+  delete_orders
+}
