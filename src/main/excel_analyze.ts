@@ -84,7 +84,7 @@ const sheet_analyze = async (filePath: string): Promise<unknown> => {
     const r1 = worksheet_sale.getRow(1).values
     if (
       r1[wingOrderNo] != 'WING平台单号' ||
-      r1[bjSendTime] != '伯俊发货时间' ||
+      r1[bjSendTime] != '单据日期' ||
       r1[totalNumSalse] != '总数量' ||
       r1[totalAmountSalse] != '总成交金额'
     ) {
