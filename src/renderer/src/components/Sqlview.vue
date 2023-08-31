@@ -10,13 +10,8 @@
     <n-button type="primary" :loading="data.loading" @click="exportFile"> 导出 </n-button>
   </n-space>
   <n-space vertical :size="24">
-    <n-data-table
-      scroll-x="2600"
-      :bordered="false"
-      :columns="data.columns"
-      :data="data.queryData"
-      :pagination="paginationReactive"
-    />
+    <n-data-table scroll-x="2600" :bordered="false" :columns="data.columns" :data="data.queryData"
+      :pagination="paginationReactive" />
   </n-space>
 </template>
 
@@ -34,6 +29,7 @@ import {
   useDialog
 } from 'naive-ui'
 import { format } from 'date-fns'
+import { TableColumns } from 'naive-ui/es/data-table/src/interface';
 interface Columns {
   wingOrderNo: string
   bjSendTime: string
@@ -192,7 +188,7 @@ const data = reactive({
         )
       }
     }
-  ],
+  ] as TableColumns,
   queryData: [] as Array<{ info: string }>,
   uploadFile: '' as string,
   loading: false
@@ -217,9 +213,8 @@ const queryData = async (): Promise<void> => {
   const sql = `bjSendTime between '${format(
     data.dateRange[0],
     'yyyy-MM-dd HH:mm:ss'
-  )}' and '${format(data.dateRange[1], 'yyyy-MM-dd HH:mm:ss')}' and wingOrderNo like '%${
-    data.queryOptions.wingOrderNo
-  }%'`
+  )}' and '${format(data.dateRange[1], 'yyyy-MM-dd HH:mm:ss')}' and wingOrderNo like '%${data.queryOptions.wingOrderNo
+    }%'`
   data.queryData = (await api.selectOrders(sql)) as Array<{ info: string }>
   console.log('result', data.queryData)
 }
@@ -252,9 +247,8 @@ const exportFile = async (): Promise<void> => {
   const sql = `bjSendTime between '${format(
     data.dateRange[0],
     'yyyy-MM-dd HH:mm:ss'
-  )}' and '${format(data.dateRange[1], 'yyyy-MM-dd HH:mm:ss')}' and wingOrderNo like '%${
-    data.queryOptions.wingOrderNo
-  }%'`
+  )}' and '${format(data.dateRange[1], 'yyyy-MM-dd HH:mm:ss')}' and wingOrderNo like '%${data.queryOptions.wingOrderNo
+    }%'`
   api
     .exportFile(sql)
     .then((res) => {
